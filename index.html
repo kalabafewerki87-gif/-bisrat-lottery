@@ -15,7 +15,7 @@
 <body class="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
 
   <!-- Header -->
-  <header class="bg-gray-800 border-b border-gray-700 py-4 px-6 sticky top-0 z-40 shadow-md">
+  <header class="bg-gray-800 border-b border-gray-700 py-4 px-6 sticky top-0 z-50 shadow-md">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-2 space-x-reverse">
         <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-black font-bold text-xl shadow">
@@ -64,22 +64,12 @@
             class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 text-sm">
         </div>
 
-        <!-- Locked Official Ticket Price -->
+        <!-- Dynamic Ticket Price (ዝቕየር ዋጋ ትኬት) -->
         <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="text-xs text-gray-400">ዋጋ ትኬት (ወግዓዊ ዋጋ)</label>
-            <span class="text-[10px] text-gray-500">* በዓል ዋና ንምቕያር ጠውቕ</span>
-          </div>
-          <div class="w-full bg-gray-900/90 border border-gray-700 rounded-lg px-4 py-3 flex justify-between items-center shadow-inner">
-            <span id="displayPriceText" class="text-xl font-extrabold text-yellow-400 font-mono">1,000 ETB</span>
-            
-            <button type="button" 
-              onclick="openAdminGate()" 
-              class="text-xs bg-yellow-500/20 hover:bg-yellow-500/40 text-yellow-300 border border-yellow-500/40 px-3 py-1.5 rounded-full font-semibold transition cursor-pointer shadow">
-              ወግዓዊ ዋጋ 🔒
-            </button>
-          </div>
-          <input type="hidden" id="ticketPrice" value="1000">
+          <label class="block text-xs text-gray-400 mb-1">ዋጋ ትኬት (ብር)</label>
+          <input type="number" id="ticketPrice" required value="1000" min="50" step="50"
+            class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-2.5 text-yellow-400 font-bold text-lg focus:outline-none focus:border-yellow-500">
+          <p class="text-[10px] text-gray-400 mt-1">* ዋጋ ትኬት ከከምቲ ዕጻ ክቕየር ይኽእል እዩ</p>
         </div>
 
         <!-- Verified CBE Bank Info Box -->
@@ -110,7 +100,7 @@
       </form>
     </div>
 
-    <!-- Success Ticket Card -->
+    <!-- Success Ticket Card (Initially Hidden) -->
     <div id="ticketResult" class="hidden bg-gray-800 border-2 border-yellow-500 rounded-2xl p-6 text-center shadow-2xl">
       <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
         ✓
@@ -151,126 +141,23 @@
 
   </main>
 
-  <!-- 🔒 ክልተ-ደረጃ ናይ በዓል ዋና መቆጻጸሪ መስኮት (2-Step Security Gate) -->
-  <div id="adminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
-    <div class="bg-gray-800 border-2 border-yellow-500 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
-      
-      <!-- ደረጃ 1፦ ፓስወርድ ምእታው ጥራይ (ናይ ዋጋ መጻሕፊ የለን!) -->
-      <div id="stepPassword" class="space-y-4">
-        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
-          <h3 class="text-base font-bold text-yellow-400">🔒 ናይ በዓል ዋና መረጋገጺ</h3>
-          <button type="button" onclick="closeAdminGate()" class="text-gray-400 hover:text-white text-xl font-bold">✕</button>
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">ናይ ምስጢር ፓስወርድ ኣእትዉ፦</label>
-          <input type="password" id="adminPassInput" placeholder="ፓስወርድ ኣእትዉ"
-            class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-yellow-500">
-          <p id="passErrorMsg" class="hidden text-xs text-red-400 mt-1"></p>
-        </div>
-        <div class="flex space-x-2 space-x-reverse pt-1">
-          <button type="button" onclick="verifyAdminPassword()" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2.5 rounded-lg text-sm transition shadow">
-            ሕለፍ ➔
-          </button>
-          <button type="button" onclick="closeAdminGate()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2.5 rounded-lg text-sm transition">
-            ዕጾ
-          </button>
-        </div>
-      </div>
-
-      <!-- ደረጃ 2፦ ፓስወርድ ምስ ጸደቐ ጥራይ እትኽፈት ናይ ዋጋ መቐየሪት! -->
-      <div id="stepChangePrice" style="display: none;" class="space-y-4">
-        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
-          <h3 class="text-base font-bold text-green-400">✅ ሓዲሽ ዋጋ ምምራጽ</h3>
-          <button type="button" onclick="closeAdminGate()" class="text-gray-400 hover:text-white text-xl font-bold">✕</button>
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">ሓዲሽ ዋጋ ትኬት (ብር)፦</label>
-          <input type="number" id="newPriceInput" placeholder="ንኣብነት፦ 2000"
-            class="w-full bg-gray-900 border border-yellow-500 rounded-lg px-3 py-2.5 text-yellow-400 font-extrabold text-lg focus:outline-none">
-        </div>
-        <div class="flex space-x-2 space-x-reverse pt-1">
-          <button type="button" onclick="commitNewPrice()" class="flex-1 bg-green-500 hover:bg-green-600 text-black font-bold py-2.5 rounded-lg text-sm transition shadow">
-            ዋጋ ቀይር ✓
-          </button>
-          <button type="button" onclick="closeAdminGate()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2.5 rounded-lg text-sm transition">
-            ዕጾ
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
   <!-- Footer -->
   <footer class="bg-gray-800/80 border-t border-gray-800 text-center py-4 text-xs text-gray-500">
     © 2026 ብስራት ኦንላይን ዕጻ። ኩሉ መሰሉ ብሕጊ ዝተሓለወ እዩ 🔒
   </footer>
 
-  <!-- 1. ናይ በዓል ዋና ክልተ-ደረጃ መቆጻጸሪ ኮድ -->
+  <!-- Logic Script -->
   <script>
-    const ADMIN_KEY = "Bisrat#9824@Admin";
-
-    function openAdminGate() {
-      document.getElementById("adminModal").style.display = "flex";
-      document.getElementById("stepPassword").style.display = "block";
-      document.getElementById("stepChangePrice").style.display = "none";
-      document.getElementById("adminPassInput").value = "";
-      document.getElementById("passErrorMsg").classList.add("hidden");
-    }
-
-    function closeAdminGate() {
-      document.getElementById("adminModal").style.display = "none";
-    }
-
-    // ደረጃ 1: ፓስወርድ ምጽራይ
-    function verifyAdminPassword() {
-      const enteredPass = document.getElementById("adminPassInput").value;
-      const errorMsg = document.getElementById("passErrorMsg");
-
-      if (enteredPass === ADMIN_KEY) {
-        // ፓስወርድ ቅኑዕ እዩ! ደረጃ 1 ኣጥፊእካ ደረጃ 2 ኣርኢ
-        document.getElementById("stepPassword").style.display = "none";
-        document.getElementById("stepChangePrice").style.display = "block";
-        document.getElementById("newPriceInput").value = "";
-        document.getElementById("newPriceInput").focus();
-      } else {
-        errorMsg.innerText = "❌ ጌጋ ፓስወርድ! ምእታው ኣይፍቀድን።";
-        errorMsg.classList.remove("hidden");
-      }
-    }
-
-    // ደረጃ 2: ዋጋ ምቕያር
-    function commitNewPrice() {
-      const newPrice = parseFloat(document.getElementById("newPriceInput").value);
-
-      if (isNaN(newPrice) || newPrice <= 0) {
-        alert("❌ በጃኹም ቅኑዕ ናይ ገንዘብ መጠን ኣእትዉ።");
-        return;
-      }
-
-      document.getElementById("ticketPrice").value = newPrice;
-      document.getElementById("displayPriceText").innerText = newPrice.toLocaleString() + " ETB";
-      closeAdminGate();
-      alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ኣሎ!");
-    }
-
     function copyAccount() {
       navigator.clipboard.writeText("1000791356397");
       alert("ናይ ንግዲ ባንክ ቁጽሪ ሕሳብ (1000791356397) ኮፒ ተገይሩ ኣሎ!");
     }
-  </script>
 
-  <!-- 2. ናይ Supabase ክፍሊት መመዝገቢ ኮድ -->
-  <script>
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
+    
     const SUPABASE_ANON_KEY = "sb_publishable_2B9XlvwHczehRW4exTnJJQ_HYSwD2vf";
 
-    let supabaseClient = null;
-    try {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch(err) {
-      console.log("Supabase initialization:", err);
-    }
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function handlePayment(e) {
       e.preventDefault();
@@ -282,6 +169,7 @@
       const phone = document.getElementById("phoneNumber").value;
       const ticketPrice = parseFloat(document.getElementById("ticketPrice").value);
 
+      // ናትካ 100 ቅርሺ ኮሚሽን
       const developerFee = 100;
       const organizerShare = ticketPrice - developerFee;
 
@@ -289,28 +177,34 @@
       const ticketCode = "BISRAT-" + randomSlot;
       const fakeTxId = "FT" + Date.now();
 
-      if (supabaseClient) {
-        await supabaseClient.from('tickets').insert([
-          {
-            full_name: fullName,
-            phone_number: phone,
-            ticket_number: ticketCode,
-            transaction_id: fakeTxId,
-            ticket_price: ticketPrice,
-            developer_fee: developerFee,
-            organizer_share: organizerShare,
-            payment_status: 'PAID'
-          }
-        ]);
+      const { data, error } = await supabase.from('tickets').insert([
+        {
+          full_name: fullName,
+          phone_number: phone,
+          ticket_number: ticketCode,
+          transaction_id: fakeTxId,
+          ticket_price: ticketPrice,
+          developer_fee: developerFee,
+          organizer_share: organizerShare,
+          payment_status: 'PAID'
+        }
+      ]);
+
+      if (error) {
+        alert("Error: " + error.message);
+        btn.innerText = "ብ-CBE ብቕጽበት ክፈል ➔";
+        btn.disabled = false;
+        return;
       }
 
+      // Display Ticket
       document.getElementById("purchaseSection").classList.add("hidden");
       document.getElementById("ticketResult").classList.remove("hidden");
 
       document.getElementById("ticketNumberDisplay").innerText = ticketCode;
       document.getElementById("nameDisplay").innerText = fullName;
       document.getElementById("phoneDisplay").innerText = phone;
-      document.getElementById("priceDisplay").innerText = ticketPrice.toLocaleString() + " ETB";
+      document.getElementById("priceDisplay").innerText = ticketPrice + " ETB";
 
       new QRCode(document.getElementById("qrcode"), {
         text: "BISRAT_VERIFIED:" + ticketCode + ":" + phone + ":" + ticketPrice,
