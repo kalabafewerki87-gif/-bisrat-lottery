@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Chapa Official Inline Payment SDK -->
+  <script src="https://js.chapa.co/v1/inline.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700&display=swap');
     body { font-family: 'Noto Sans Ethiopic', sans-serif; }
@@ -43,7 +45,7 @@
         ⚠️ ወግዓዊ መተሓሳሰቢ፦
       </p>
       <p class="text-xs text-gray-300">
-        እዚ መድረኽ ብስራት ኦንላይን ዕጻ እዩ። ክፍሊት ቅድሚ ምፍጻምኩም እቲ ኣብ ታሕቲ ዘሎ ናይ ንግዲ ባንክ (CBE) ሽም ሕሳብ <strong>Bisrat Atsibeha Gebreslasse</strong> ምዃኑ ኣረጋግጹ።
+        እዚ መድረኽ ብስራት ኦንላይን ዕጻ እዩ። ክፍሊትኩም ብቀጥታ ብንግዲ ባንክ ኢትዮጵያ (CBE Birr / CBE) ዝረጋገጽ ውሑስ መድረኽ እዩ።
       </p>
     </div>
 
@@ -51,8 +53,9 @@
     <div id="purchaseSection" class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl">
       <h2 class="text-xl font-bold mb-4 text-center text-yellow-400">ናይ ዕጻ ትኬት ምግዛእ</h2>
 
-      <form id="lotteryForm" onsubmit="handlePayment(event)" class="space-y-4">
+      <form id="lotteryForm" onsubmit="handleCbePayment(event)" class="space-y-4">
         
+        <!-- 👤 ምሉእ ሽም (ሰለስተ ሽም) -->
         <div>
           <label class="block text-xs text-gray-300 mb-1 font-semibold">
             ምሉእ ሽምኩም (ስም፡ ስም ኣቦ፡ ስም ኣቦ-ሓጎ) *
@@ -62,7 +65,7 @@
         </div>
 
         <div>
-          <label class="block text-xs text-gray-300 mb-1 font-semibold">ስልኪ ቁጽርኹም *</label>
+          <label class="block text-xs text-gray-300 mb-1 font-semibold">ስልኪ ቁጽርኹም (CBE Birr ዘለዎ) *</label>
           <input type="tel" id="phoneNumber" required placeholder="09XXXXXXXX" 
             class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 text-sm">
         </div>
@@ -106,10 +109,14 @@
           </div>
         </div>
 
+        <!-- CBE Payment Button -->
         <button type="submit" id="submitBtn"
-          class="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold py-3 rounded-xl transition duration-200 text-base shadow-lg">
-          ብ-CBE ብቕጽበት ክፈል ➔
+          class="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold py-3.5 rounded-xl transition duration-200 text-base shadow-lg flex items-center justify-center space-x-2">
+          <span>ብ-CBE (ንግዲ ባንክ) ብቕጽበት ክፈል ➔</span>
         </button>
+
+        <!-- Chapa CBE Form Container -->
+        <div id="chapa-inline-form" class="mt-3"></div>
       </form>
     </div>
 
@@ -124,7 +131,11 @@
       <div class="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-4 text-left space-y-2">
         <div class="flex justify-between items-center border-b border-gray-800 pb-2">
           <span class="text-xs text-gray-400">ናይ ዕጻ ቁጽርኹም፦</span>
-          <span id="ticketNumberDisplay" class="text-xl font-extrabold text-yellow-400 font-mono">BISRAT-0000</span>
+          <span id="ticketNumberDisplay" class="text-xl font-extrabold text-yellow-400 font-mono">BISRAT-000001</span>
+        </div>
+        <div class="flex justify-between text-xs">
+          <span class="text-gray-400">ሳንዱቕ ቢንጎ #፦</span>
+          <span id="slotDisplay" class="text-sm font-bold text-green-400 font-mono">#1</span>
         </div>
         <div class="flex justify-between text-xs">
           <span class="text-gray-400">ምሉእ ሽም፦</span>
@@ -135,8 +146,8 @@
           <span id="phoneDisplay" class="font-semibold text-white">---</span>
         </div>
         <div class="flex justify-between text-xs">
-          <span class="text-gray-400">ዝተኸፍለ ዋጋ፦</span>
-          <span id="priceDisplay" class="font-semibold text-yellow-400">---</span>
+          <span class="text-gray-400">ናይ ባንኪ ቁጽሪ፦</span>
+          <span id="txDisplay" class="font-mono text-gray-300">---</span>
         </div>
         <div class="flex justify-between text-xs">
           <span class="text-gray-400">ናይ ቢንጎ ሰሌዳ፦</span>
@@ -158,7 +169,6 @@
   <div id="adminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
     <div class="bg-gray-800 border-2 border-yellow-500 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       
-      <!-- ደረጃ 1: ፓስወርድ -->
       <div id="stepPassword" class="space-y-4">
         <div class="flex justify-between items-center border-b border-gray-700 pb-2">
           <h3 class="text-base font-bold text-yellow-400">🔒 ናይ በዓል ዋና መረጋገጺ</h3>
@@ -180,7 +190,6 @@
         </div>
       </div>
 
-      <!-- ደረጃ 2: ናይ ዋጋ መቐየሪን ናይ ቢንጎ ሰነድ መውጽእን -->
       <div id="stepChangePrice" style="display: none;" class="space-y-4">
         <div class="flex justify-between items-center border-b border-gray-700 pb-2">
           <h3 class="text-base font-bold text-green-400">✅ ናይ በዓል ዋና ዳሽቦርድ</h3>
@@ -200,7 +209,6 @@
 
         <hr class="border-gray-700">
 
-        <!-- 🖨️ ናይ ቢንጎ ጣውላ ሰነድ ምሕታም (Print Sheet) -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">ናይ TikTok Live ቢንጎ ሰነድ፦</label>
           <button type="button" onclick="printBingoRoster()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center space-x-1 shadow">
@@ -251,7 +259,6 @@
       }
     }
 
-    // 💾 ሓዲሽ ዋጋ ናብ Supabase ክላውድ ምዕቃብ
     async function commitNewPrice() {
       const newPrice = parseFloat(document.getElementById("newPriceInput").value);
       const btn = document.getElementById("changePriceBtn");
@@ -268,7 +275,6 @@
       document.getElementById("ticketPrice").value = newPrice;
       document.getElementById("displayPriceText").innerText = newPrice.toLocaleString() + " ETB";
 
-      // ኣብ Supabase ቀዋሚ ምግባር
       if (supabaseClient) {
         await supabaseClient.from('settings').upsert({ id: 'current_price', price: newPrice });
       }
@@ -285,16 +291,18 @@
     }
   </script>
 
-  <!-- 2. ናይ Supabase ክፍሊት ምዝገባን ዋጋ ካብ ክላውድ ምምጻእን -->
+  <!-- 2. ናይ Supabase + Chapa CBE API ምትእስሳር -->
   <script>
     let OFFICIAL_TICKET_PRICE = 1000;
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_2B9XlvwHczehRW4exTnJJQ_HYSwD2vf";
+    
+    // 🔑 ናትካ ናይ Chapa Public Key
+    const CHAPA_PUBLIC_KEY = "CHAPA_TEST_PUB_6loxXSo-Kc3g8auT1NaQTEfcxGG2-1U8YDxYN3dW";
 
     let supabaseClient = null;
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      // እቲ ዌብሳይት ክኽፈት ከሎ፡ ነቲ ኣብ ክላውድ ዘሎ ቀዋሚ ዋጋ የውጽኦ
       loadCloudPrice();
     } catch(err) {
       console.log("Supabase initialization error:", err);
@@ -314,51 +322,100 @@
       }
     }
 
-    async function handlePayment(e) {
+    // ⚡ ናይ ንግዲ ባንክ (CBE) ክፍሊት ምፍጻም
+    async function handleCbePayment(e) {
       e.preventDefault();
       const btn = document.getElementById("submitBtn");
-      btn.innerText = "ክፍሊት ይጻረ ኣሎ...";
+      btn.innerText = "ናይ CBE ክፍሊት ይዳሎ ኣሎ...";
       btn.disabled = true;
 
       const fullName = document.getElementById("fullName").value.trim();
       const phone = document.getElementById("phoneNumber").value.trim();
       const ticketPrice = OFFICIAL_TICKET_PRICE;
+      const txRef = "CBE-BISRAT-" + Date.now();
 
       const developerFee = 100;
       const organizerShare = ticketPrice - developerFee;
 
-      const randomSlot = Math.floor(1000 + Math.random() * 9000);
-      const ticketCode = "BISRAT-" + randomSlot;
-      const fakeTxId = "FT" + Date.now();
-
-      if (supabaseClient) {
-        await supabaseClient.from('tickets').insert([
-          {
-            full_name: fullName,
-            phone_number: phone,
-            ticket_number: ticketCode,
-            transaction_id: fakeTxId,
-            ticket_price: ticketPrice,
-            developer_fee: developerFee,
-            organizer_share: organizerShare,
-            payment_status: 'PAID'
-          }
-        ]);
+      // ⚠️ ኣብ ኮምፒውተር (file:///) እንተሃልዩ ናብ Vercel ከም ዘድሊ መጠንቀቕታ ሃብ
+      if (window.location.protocol === 'file:') {
+        alert("⚠️ መተሓሳሰቢ፦ ናይ ባንኪ ክፍሊት (Chapa) ኣብ ኮምፒውተርካ ዘላ ፋይል (file:///) ከላ ብናይ ባንኪ ድሕንነት ሕጊ ክሰርሕ ኣይክእልን እዩ።\n\nነዛ ፋይል ናብ GitHub ሰቒልካ ኣብቲ ናይ Vercel ወግዓዊ ሊንክኻ (https://bisrat-lottery.vercel.app) ክትፍትና ኣለካ!");
+        btn.innerText = "ብ-CBE (ንግዲ ባንክ) ብቕጽበት ክፈል ➔";
+        btn.disabled = false;
+        return;
       }
 
-      document.getElementById("purchaseSection").classList.add("hidden");
-      document.getElementById("ticketResult").classList.remove("hidden");
+      try {
+        // Chapa CBE Birr Checkout ምጅማር
+        const chapa = new ChapaCheckout({
+          publicKey: CHAPA_PUBLIC_KEY,
+          amount: ticketPrice.toString(),
+          currency: "ETB",
+          availablePaymentMethods: ['cbebirr'], // ንግዲ ባንክ (CBE) ጥራይ!
+          phone_number: phone,
+          first_name: fullName.split(' ')[0] || 'Customer',
+          last_name: fullName.split(' ')[1] || 'Gebreslasse',
+          tx_ref: txRef,
+          customizations: {
+            buttonText: 'ብ-CBE ክፍሊት ኣጽድቕ ➔'
+          },
+          onSuccessfulPayment: async function (paymentResponse) {
+            btn.innerText = "ትኬት ይዳሎ ኣሎ...";
+            
+            // ክፍሊት ምስ ጸደቐ ጥራይ ናብ ዳታቤዝ ኣእቱ
+            const { data, error } = await supabaseClient.rpc('register_ticket_atomic', {
+              p_full_name: fullName,
+              p_phone_number: phone,
+              p_transaction_id: txRef,
+              p_ticket_price: ticketPrice,
+              p_developer_fee: developerFee,
+              p_organizer_share: organizerShare
+            });
 
-      document.getElementById("ticketNumberDisplay").innerText = ticketCode;
-      document.getElementById("nameDisplay").innerText = fullName;
-      document.getElementById("phoneDisplay").innerText = phone;
-      document.getElementById("priceDisplay").innerText = ticketPrice.toLocaleString() + " ETB";
+            if (error || !data.success) {
+              alert("ጌጋ ተፈጢሩ: " + (error ? error.message : data.error));
+              btn.innerText = "ብ-CBE (ንግዲ ባንክ) ብቕጽበት ክፈል ➔";
+              btn.disabled = false;
+              return;
+            }
 
-      new QRCode(document.getElementById("qrcode"), {
-        text: "BISRAT_VERIFIED:" + ticketCode + ":" + phone + ":" + ticketPrice,
-        width: 120,
-        height: 120
-      });
+            const ticketCode = data.ticket_number;
+            const slotNumber = data.slot_number;
+
+            document.getElementById("purchaseSection").classList.add("hidden");
+            document.getElementById("ticketResult").classList.remove("hidden");
+
+            document.getElementById("ticketNumberDisplay").innerText = ticketCode;
+            document.getElementById("slotDisplay").innerText = "#" + slotNumber;
+            document.getElementById("nameDisplay").innerText = fullName;
+            document.getElementById("phoneDisplay").innerText = phone;
+            document.getElementById("txDisplay").innerText = txRef;
+
+            new QRCode(document.getElementById("qrcode"), {
+              text: "BISRAT_VERIFIED:" + ticketCode + ":SLOT_" + slotNumber + ":" + phone + ":" + txRef,
+              width: 120,
+              height: 120
+            });
+          },
+          onPaymentFailure: function (error) {
+            alert("❌ ናይ CBE ክፍሊት ኣይተዛዘመን ወይ ተሰሪዙ ኣሎ!");
+            btn.innerText = "ብ-CBE (ንግዲ ባንክ) ብቕጽበት ክፈል ➔";
+            btn.disabled = false;
+          },
+          onClose: function() {
+            btn.innerText = "ብ-CBE (ንግዲ ባንክ) ብቕጽበት ክፈል ➔";
+            btn.disabled = false;
+          }
+        });
+
+        chapa.initialize('chapa-inline-form');
+
+      } catch (err) {
+        console.error("Chapa Checkout Error:", err);
+        alert("ናይ CBE ክፍሊት ንምኽፋት ጸገም ኣጋጢሙ።");
+        btn.innerText = "ብ-CBE (ንግዲ ባንክ) ብቕጽበት ክፈል ➔";
+        btn.disabled = false;
+      }
     }
 
     // 🖨️ ናይ ቢንጎ ጣውላ ሰነድ መውጽኢ (Print Bingo Sheet)
