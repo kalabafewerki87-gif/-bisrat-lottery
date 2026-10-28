@@ -53,7 +53,6 @@
 
       <form id="lotteryForm" onsubmit="initiateChapaCheckout(event)" class="space-y-4">
         
-        <!-- 👤 ምሉእ ሽም (ስም፡ ስም ኣቦ፡ ስም ኣቦ-ሓጎ) -->
         <div>
           <label class="block text-xs text-gray-300 mb-1 font-semibold">
             ምሉእ ሽምኩም (ስም፡ ስም ኣቦ፡ ስም ኣቦ-ሓጎ) *
@@ -68,7 +67,7 @@
             class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 text-sm">
         </div>
 
-        <!-- 🔒 Locked Official Ticket Price (ወግዓዊ ዋጋ) -->
+        <!-- 🔒 Locked Official Ticket Price -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="text-xs text-gray-400">ዋጋ ትኬት (ወግዓዊ ዋጋ)</label>
@@ -160,11 +159,10 @@
 
   </main>
 
-  <!-- 🔒 ናይ በዓል ዋና መቆጻጸሪ መስኮት (ምስ ቢንጎ ሰነድ መውጽኢ) -->
+  <!-- 🔒 ናይ በዓል ዋና መቆጻጸሪ መስኮት -->
   <div id="adminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
     <div class="bg-gray-800 border-2 border-yellow-500 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       
-      <!-- ደረጃ 1: ፓስወርድ -->
       <div id="stepPassword" class="space-y-4">
         <div class="flex justify-between items-center border-b border-gray-700 pb-2">
           <h3 class="text-base font-bold text-yellow-400">🔒 ናይ በዓል ዋና መረጋገጺ</h3>
@@ -186,7 +184,6 @@
         </div>
       </div>
 
-      <!-- ደረጃ 2: ናይ ዋጋ መቐየሪን ናይ ቢንጎ ሰነድ መውጽእን -->
       <div id="stepChangePrice" style="display: none;" class="space-y-4">
         <div class="flex justify-between items-center border-b border-gray-700 pb-2">
           <h3 class="text-base font-bold text-green-400">✅ ናይ በዓል ዋና ዳሽቦርድ</h3>
@@ -206,7 +203,6 @@
 
         <hr class="border-gray-700">
 
-        <!-- 🖨️ ናይ ቢንጎ ጣውላ ሰነድ ምሕታም (Print Sheet) -->
         <div>
           <label class="block text-xs text-gray-400 mb-1">ናይ TikTok Live ቢንጎ ሰነድ፦</label>
           <button type="button" onclick="printBingoRoster()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center space-x-1 shadow">
@@ -257,6 +253,7 @@
       }
     }
 
+    // 💾 ዋጋ ኣብ ብራውዘርን ክላውድን ቀዋሚ ምግባር
     async function commitNewPrice() {
       const newPrice = parseFloat(document.getElementById("newPriceInput").value);
       const btn = document.getElementById("changePriceBtn");
@@ -273,14 +270,22 @@
       document.getElementById("ticketPrice").value = newPrice;
       document.getElementById("displayPriceText").innerText = newPrice.toLocaleString() + " ETB";
 
+      // 1. ኣብ Local Storage ቀዋሚ ግበሮ (ፈጺሙ ከይጠፍእ)
+      localStorage.setItem("permanent_ticket_price", newPrice.toString());
+
+      // 2. ኣብ Supabase ክላውድ'ውን ዕቀቦ
       if (supabaseClient) {
-        await supabaseClient.from('settings').upsert({ id: 'current_price', price: newPrice });
+        try {
+          await supabaseClient.from('settings').upsert({ id: 'current_price', price: newPrice });
+        } catch(e) {
+          console.log("Supabase settings sync error:", e);
+        }
       }
 
       btn.innerText = "ቀይር";
       btn.disabled = false;
       closeAdminGate();
-      alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ኣብ ክላውድ ቀዋሚ ኮይኑ ተዓቒቡ ኣሎ!");
+      alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ቀዋሚ ኮይኑ ተዓቒቡ ኣሎ!");
     }
 
     function copyAccount() {
@@ -291,9 +296,12 @@
 
   <!-- 2. ናይ Supabase + Backend Chapa Integration -->
   <script>
-    let OFFICIAL_TICKET_PRICE = 1000;
+    // ኣብ መጀመርታ ዝቕመጥ ዋጋ (ካብ LocalStorage ወይ ካብ 1000 ይጅምር)
+    let OFFICIAL_TICKET_PRICE = parseFloat(localStorage.getItem("permanent_ticket_price")) || 1000;
+
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
-    const SUPABASE_ANON_KEY = "PASTE_YOUR_COPIED_KEY_HERE";
+    // 🔑 ናትካ ናይ Supabase Publishable Key ኣብዚኣ ኣላ:
+    const SUPABASE_ANON_KEY = "sb_publishable_2B9XlvwHczehRW4exTnJJQ_HYSwDFQ";
 
     let supabaseClient = null;
     try {
@@ -304,12 +312,17 @@
       console.log("Supabase initialization error:", err);
     }
 
+    // ኣብ ስክሪን ምግሃድ
+    document.getElementById("ticketPrice").value = OFFICIAL_TICKET_PRICE;
+    document.getElementById("displayPriceText").innerText = OFFICIAL_TICKET_PRICE.toLocaleString() + " ETB";
+
     async function loadCloudPrice() {
       if (!supabaseClient) return;
       try {
         const { data, error } = await supabaseClient.from('settings').select('price').eq('id', 'current_price').single();
         if (data && data.price) {
           OFFICIAL_TICKET_PRICE = parseFloat(data.price);
+          localStorage.setItem("permanent_ticket_price", OFFICIAL_TICKET_PRICE.toString());
           document.getElementById("ticketPrice").value = OFFICIAL_TICKET_PRICE;
           document.getElementById("displayPriceText").innerText = OFFICIAL_TICKET_PRICE.toLocaleString() + " ETB";
         }
@@ -318,7 +331,7 @@
       }
     }
 
-    // 🚀 ናብታ ናትና Backend ፋይል (/api/pay) ልኢኹ ናብ Chapa ዘሰጋግር
+    // 🚀 ናብ Vercel Backend (/api/pay) ምልኣኽ
     async function initiateChapaCheckout(e) {
       e.preventDefault();
       const btn = document.getElementById("submitBtn");
