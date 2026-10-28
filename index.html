@@ -253,7 +253,7 @@
       }
     }
 
-    // 💾 ዋጋ ኣብ ብራውዘርን ክላውድን ቀዋሚ ምግባር
+    // 💾 ዋጋ ኣብ ክላውድ ብትኽክል ምዕቃብ
     async function commitNewPrice() {
       const newPrice = parseFloat(document.getElementById("newPriceInput").value);
       const btn = document.getElementById("changePriceBtn");
@@ -266,26 +266,34 @@
       btn.innerText = "ይዕቀብ...";
       btn.disabled = true;
 
+      // 1. ኣብ ስክሪን ቀይሮ
       OFFICIAL_TICKET_PRICE = newPrice;
       document.getElementById("ticketPrice").value = newPrice;
       document.getElementById("displayPriceText").innerText = newPrice.toLocaleString() + " ETB";
-
-      // 1. ኣብ Local Storage ቀዋሚ ግበሮ (ፈጺሙ ከይጠፍእ)
       localStorage.setItem("permanent_ticket_price", newPrice.toString());
 
-      // 2. ኣብ Supabase ክላውድ'ውን ዕቀቦ
+      // 2. ኣብ Supabase ክላውድ ብቐጥታ update ግበሮ
       if (supabaseClient) {
         try {
-          await supabaseClient.from('settings').upsert({ id: 'current_price', price: newPrice });
-        } catch(e) {
-          console.log("Supabase settings sync error:", e);
+          const { error } = await supabaseClient
+            .from('settings')
+            .update({ price: newPrice })
+            .eq('id', 'current_price');
+
+          if (error) {
+            console.error("Cloud price update error:", error);
+            alert("⚠️ መጠንቀቕታ: ዋጋ ኣብ ክላውድ ኣይተዓቀበን፦ " + error.message);
+          } else {
+            alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ኣብ ክላውድ ቀዋሚ ኮይኑ ተዓቒቡ ኣሎ!");
+          }
+        } catch(err) {
+          console.error("Cloud save failed:", err);
         }
       }
 
       btn.innerText = "ቀይር";
       btn.disabled = false;
       closeAdminGate();
-      alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ቀዋሚ ኮይኑ ተዓቒቡ ኣሎ!");
     }
 
     function copyAccount() {
@@ -296,11 +304,9 @@
 
   <!-- 2. ናይ Supabase + Backend Chapa Integration -->
   <script>
-    // ኣብ መጀመርታ ዝቕመጥ ዋጋ (ካብ LocalStorage ወይ ካብ 1000 ይጅምር)
     let OFFICIAL_TICKET_PRICE = parseFloat(localStorage.getItem("permanent_ticket_price")) || 1000;
 
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
-    // 🔑 ናትካ ናይ Supabase Publishable Key ኣብዚኣ ኣላ:
     const SUPABASE_ANON_KEY = "sb_publishable_2B9XlvwHczehRW4exTnJJQ_HYSwDFQ";
 
     let supabaseClient = null;
@@ -312,14 +318,18 @@
       console.log("Supabase initialization error:", err);
     }
 
-    // ኣብ ስክሪን ምግሃድ
     document.getElementById("ticketPrice").value = OFFICIAL_TICKET_PRICE;
     document.getElementById("displayPriceText").innerText = OFFICIAL_TICKET_PRICE.toLocaleString() + " ETB";
 
     async function loadCloudPrice() {
       if (!supabaseClient) return;
       try {
-        const { data, error } = await supabaseClient.from('settings').select('price').eq('id', 'current_price').single();
+        const { data, error } = await supabaseClient
+          .from('settings')
+          .select('price')
+          .eq('id', 'current_price')
+          .single();
+
         if (data && data.price) {
           OFFICIAL_TICKET_PRICE = parseFloat(data.price);
           localStorage.setItem("permanent_ticket_price", OFFICIAL_TICKET_PRICE.toString());
@@ -331,7 +341,6 @@
       }
     }
 
-    // 🚀 ናብ Vercel Backend (/api/pay) ምልኣኽ
     async function initiateChapaCheckout(e) {
       e.preventDefault();
       const btn = document.getElementById("submitBtn");
@@ -373,7 +382,6 @@
       }
     }
 
-    // 🎉 ካብ Chapa ክፍሊት ምስ ተዓወተ ትኬት ምሃብ
     async function checkPaymentReturn() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("payment") === "success") {
@@ -420,7 +428,6 @@
       }
     }
 
-    // 🖨️ ናይ ቢንጎ ጣውላ ሰነድ መውጽኢ (Print Bingo Sheet)
     async function printBingoRoster() {
       if (!supabaseClient) return;
 
