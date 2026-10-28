@@ -310,7 +310,7 @@
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       loadCloudPrice();
-      checkPaymentReturn(); // Chapa ምስ ወደአ ተመሊሱ እንተመጺኡ መርምር
+      checkPaymentReturn();
     } catch(err) {
       console.log("Supabase initialization error:", err);
     }
@@ -329,7 +329,7 @@
       }
     }
 
-    // 🚀 ናብታ ናይ Chapa ወግዓዊት ናይ ፈተነ ገጽ ምሕላፍ
+    // 🚀 ናብታ ናይ Chapa ወግዓዊት ናይ ፈተነ ገጽ ምሕላፍ (ምስ ጽሩይ ኢሜይል)
     function initiateChapaCheckout(e) {
       e.preventDefault();
       const btn = document.getElementById("submitBtn");
@@ -340,12 +340,16 @@
       const phone = document.getElementById("phoneNumber").value.trim();
       const ticketPrice = OFFICIAL_TICKET_PRICE;
 
-      const nameParts = fullName.split(" ");
+      // ጽሩይ ስልኪ ቁጽርን ጽሩይ ኢሜይልን ምድላው (validation.email ጌጋ ከይፍጠር)
+      const cleanPhone = phone.replace(/[^0-9]/g, "");
+      const validEmail = "customer" + (cleanPhone || Date.now()) + "@gmail.com";
+
+      const nameParts = fullName.split(/\s+/);
       const firstName = nameParts[0] || "Customer";
       const lastName = nameParts.slice(1).join(" ") || "User";
       const txRef = "CBE-BISRAT-" + Date.now();
 
-      // ንዓዳጊ ኣብ Session ምዕቃብ (Chapa ተመሊሱ ምስ መጸ ትኬት ንኽወሃቦ)
+      // ንዓዳጊ ኣብ Storage ምዕቃብ (Chapa ተመሊሱ ምስ መጸ ትኬት ንኽወሃቦ)
       localStorage.setItem("pending_buyer_name", fullName);
       localStorage.setItem("pending_buyer_phone", phone);
       localStorage.setItem("pending_ticket_price", ticketPrice);
@@ -356,7 +360,7 @@
       document.getElementById("chapa_amount").value = ticketPrice;
       document.getElementById("chapa_first_name").value = firstName;
       document.getElementById("chapa_last_name").value = lastName;
-      document.getElementById("chapa_email").value = phone + "@bisratlottery.com";
+      document.getElementById("chapa_email").value = validEmail;
       
       // Chapa ምስ ወደአ ናበይ ክመልሶ ከም ዘለዎ ምሕባር
       const currentUrl = window.location.origin + window.location.pathname;
@@ -378,7 +382,6 @@
         const developerFee = 100;
         const organizerShare = ticketPrice - developerFee;
 
-        // ኣብ Supabase 100,000 ተኸታታሊ ትኬት ምምዝጋብ
         if (supabaseClient) {
           const { data, error } = await supabaseClient.rpc('register_ticket_atomic', {
             p_full_name: fullName,
@@ -408,7 +411,6 @@
               height: 120
             });
 
-            // ሊንክ ምጽራይ (ዳግም ከይደግሞ)
             window.history.replaceState({}, document.title, window.location.pathname);
           }
         }
