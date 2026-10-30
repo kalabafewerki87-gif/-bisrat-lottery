@@ -39,19 +39,19 @@
   <!-- Main Container -->
   <main class="max-w-md mx-auto p-4 w-full flex-grow">
 
-    <!-- 🛑 ዕጻ ተዓጽዩ እንተሃልዩ ዝርአ ናይ መዕጸዊ መልእኽቲ (Closed Banner) -->
+    <!-- 🛑 ዕጻ ተዓጽዩ እንተሃልዩ ዝርአ ናይ መዕጸዊ መልእኽቲ -->
     <div id="lotteryClosedNotice" class="hidden bg-gradient-to-r from-red-900/60 to-gray-800 border-2 border-red-500/60 rounded-xl p-4 mb-4 text-center shadow-lg">
       <p class="text-base font-bold text-red-400 mb-1">🛑 ናይዚ ዙርያ መሸጣ ትኬት ተዓጽዩ ኣሎ!</p>
       <p class="text-xs text-gray-300">ናይ ሎሚ ዙርያ መሸጣ ብወግዒ ደው ኢሉ ኣሎ። ዕጻ ኣብ TikTok Live እናተኻየደ ስለ ዝኾነ ተኸታተሉ!</p>
     </div>
 
-    <!-- Official Notice Card -->
+    <!-- Official Notice Card (ዝተስተኻኸለ ወግዓዊ መተሓሳሰቢ) -->
     <div class="bg-gradient-to-r from-yellow-900/40 to-gray-800 border border-yellow-600/40 rounded-xl p-4 mb-5 text-sm text-yellow-200 shadow">
-      <p class="font-semibold flex items-center mb-1">
+      <p class="font-bold flex items-center mb-1 text-yellow-400">
         ⚠️ ወግዓዊ መተሓሳሰቢ፦
       </p>
-      <p class="text-xs text-gray-300">
-        እዚ መድረኽ ብስራት ኦንላይን ዕጻ እዩ። ክፍሊትኩም ብቀጥታ ብናይ ንግዲ ባንክ (CBE) ናብቲ ኣብ ታሕቲ ዘሎ ሽም ሕሳብ <strong>Bisrat Atsibeha Gebreslasse</strong> ምዃኑ ኣረጋጊጽኩም ኣእትዉ።
+      <p class="text-xs text-gray-200 leading-relaxed">
+        እዚ መድረኽ ብስራት ኦንላይን ዕጻ እዩ። <strong class="text-yellow-300">ተቐባሊ ሕሳብና ብናይ ንግዲ ባንክ (CBE) ጥራይ እዩ ዝቕበል!</strong> እንተኾነ ግን ካብ ዝኾነ ባንኪ (ካብ CBE፡ Telebirr፡ ኣዋሽ፡ ኣቢሲንያ፡ ዳሽን ወዘተ) ብቐጥታ ናብዚ ናይ CBE ኣካውንትና ዝተኸፈለ ደረሰኝ ይቕበል እዩ። ተቐባሊ ባንኪ <strong class="text-white">ንግዲ ባንክ (CBE)</strong>፡ ሽም ሕሳብ <strong class="text-yellow-400">Bisrat Atsibeha Gebreslasse</strong> ምዃኑ ጥራይ ቅድሚ ምኽፋልኩም ኣረጋግጹ።
       </p>
     </div>
 
@@ -94,18 +94,18 @@
           <input type="hidden" id="ticketPrice" value="1000">
         </div>
 
-        <!-- Verified CBE Bank Info Box -->
+        <!-- Verified CBE Destination Bank Info Box -->
         <div class="bg-gray-900/90 border border-yellow-500/40 rounded-xl p-3 text-xs space-y-2 text-gray-300">
           <div class="flex justify-between items-center border-b border-gray-800 pb-1.5">
-            <span class="text-gray-400">ባንኪ፦</span>
+            <span class="text-gray-400">ተቐባሊ ባንኪ፦</span>
             <span class="font-semibold text-white">ንግዲ ባንክ ኢትዮጵያ (CBE)</span>
           </div>
           <div class="flex justify-between items-center border-b border-gray-800 pb-1.5">
-            <span class="text-gray-400">ሽም ሕሳብ፦</span>
+            <span class="text-gray-400">ተቐባሊ ሽም ሕሳብ፦</span>
             <span class="font-bold text-yellow-400">Bisrat Atsibeha Gebreslasse</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-400">ቁጽሪ ሕሳብ (CBE)፦</span>
+            <span class="text-gray-400">ተቐባሊ ቁጽሪ ሕሳብ፦</span>
             <div class="flex items-center space-x-1.5">
               <span class="font-mono font-extrabold text-white bg-gray-800 px-2 py-1 rounded text-sm select-all">1000791356397</span>
               <button type="button" onclick="copyAccount()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-2 py-1 rounded text-[10px] font-bold transition">
@@ -115,15 +115,15 @@
           </div>
         </div>
 
-        <!-- 📸 ናይ CBE ደረሰኝ ስክሪንሾት መእተዊ (ምስ ናይ ምድምሳስ/ምስራዝ መጠወቒት) -->
+        <!-- 📸 ናይ ባንኪ ደረሰኝ ስክሪንሾት መእተዊ -->
         <div>
           <label class="block text-xs text-yellow-400 font-semibold mb-1">
-            📸 ናይ CBE ደረሰኝ ስክሪንሾት ስቐሉ (Upload Receipt) *
+            📸 ናይ ባንኪ ደረሰኝ ስክሪንሾት ስቐሉ (ካብ ዝኾነ ባንኪ ዝተኸፈለ) *
           </label>
           <input type="file" id="receiptImage" accept="image/*" required onchange="handleFileSelect(event)"
             class="w-full bg-gray-900 border border-yellow-500/60 rounded-lg p-2 text-xs text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
           
-          <!-- ✕ ብጌጋ ንዝተሰቐለ ፋይል መወገዲ ሳንዱቕ (File Clear Bar) -->
+          <!-- ✕ ብጌጋ ንዝተሰቐለ ፋይል መወገዲ ሳንዱቕ -->
           <div id="fileSelectedBox" class="hidden items-center justify-between bg-gray-950 border border-yellow-500/40 p-2.5 rounded-lg mt-2">
             <div class="flex items-center space-x-2 truncate">
               <span class="text-green-400 text-sm">📎</span>
@@ -135,7 +135,7 @@
           </div>
 
           <p id="scanStatus" class="text-[11px] text-gray-400 mt-1">
-            * ብ-CBE ምስ ከፈልኩም ነቲ ደረሰኝ ስክሪንሾት (ፎቶ) ኣብዚ ስቐልዎ። ብጌጋ እንተሰቒልኩም "✕ ኣወግድ" ብምጥዋቕ ክትቕይርዎ ትኽእሉ ኢኹም።
+            * ካብ CBE፣ Telebirr፣ ኣዋሽ፣ ዳሽን፣ ወጋገን ወይ ካልእ ዝኾነ ባንኪ ናብዚ ናይ CBE ሕሳብና ዝተኸፈለ ስክሪንሾት ስቐሉ። እቲ ሲስተም ብቕጽበት መርሚሩ ትኬትኩም ክህበኩም እዩ።
           </p>
         </div>
 
@@ -172,7 +172,7 @@
           <span id="phoneDisplay" class="font-semibold text-white">---</span>
         </div>
         <div class="flex justify-between text-xs">
-          <span class="text-gray-400">ዝተነበበ ናይ FT ቁጽሪ፦</span>
+          <span class="text-gray-400">ናይ ባንኪ ደረሰኝ ቁጽሪ፦</span>
           <span id="txDisplay" class="font-mono text-yellow-400 font-bold">---</span>
         </div>
         <div class="flex justify-between text-xs">
@@ -191,7 +191,7 @@
 
   </main>
 
-  <!-- 🔒 ናይ በዓል ዋና መቆጻጸሪ መስኮት (ምስ ON/OFF Switch) -->
+  <!-- 🔒 ናይ በዓል ዋና መቆጻጸሪ መስኮት -->
   <div id="adminModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
     <div class="bg-gray-800 border-2 border-yellow-500 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       
@@ -250,7 +250,6 @@
             <span id="roundStartTimeDisplay" class="font-mono text-yellow-400 font-bold">---</span>
           </div>
           
-          <!-- ON / OFF Buttons -->
           <div class="grid grid-cols-2 gap-2 pt-1">
             <button type="button" onclick="startNewLotteryRound()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-[11px] transition shadow flex items-center justify-center space-x-1">
               <span>🚀 ሓዲሽ ዙርያ ጀምር (ON)</span>
@@ -347,7 +346,6 @@
       alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ኣብ ክላውድ ቀዋሚ ኮይኑ ተዓቒቡ ኣሎ!");
     }
 
-    // 🚀 ሓዲሽ ዙርያ ምጅማር (Turn ON)
     async function startNewLotteryRound() {
       const now = new Date();
       const timestamp = now.getTime();
@@ -371,7 +369,6 @@
       alert("🚀 ሓዲሽ ናይ ዕጻ ዙርያ ብወግዒ ተኸፊቱ (ON) ኣሎ!\nመበገሲ ሰዓት፦ " + formattedTime);
     }
 
-    // 🛑 ዕጻ ደው ምባል (Turn OFF)
     async function stopLotteryRound() {
       localStorage.setItem("lottery_is_active", "false");
 
@@ -423,7 +420,6 @@
       alert("ናይ ንግዲ ባንክ ቁጽሪ ሕሳብ (1000791356397) ኮፒ ተገይሩ ኣሎ!");
     }
 
-    // ✕ ፋይል ምምራጽን ምድምሳስን (Handle File Selection & Clear)
     function handleFileSelect(e) {
       const fileInput = document.getElementById("receiptImage");
       const box = document.getElementById("fileSelectedBox");
@@ -442,17 +438,17 @@
 
     function clearSelectedReceipt() {
       const fileInput = document.getElementById("receiptImage");
-      fileInput.value = ""; // ፋይል ካብ ሳንዱቕ ምድምሳስ
+      fileInput.value = "";
       const box = document.getElementById("fileSelectedBox");
       box.classList.add("hidden");
       box.classList.remove("flex");
       const statusText = document.getElementById("scanStatus");
-      statusText.innerText = "* ዝተሰቐለ ፋይል ተሰሪዙ ኣሎ። ትኽክለኛ ናይ CBE ደረሰኝ ፎቶ ስቐሉ።";
+      statusText.innerText = "* ዝተሰቐለ ፋይል ተሰሪዙ ኣሎ። ትኽክለኛ ናይ ባንኪ ደረሰኝ ፎቶ ስቐሉ።";
       statusText.className = "text-[11px] text-gray-400 mt-1";
     }
   </script>
 
-  <!-- 2. ናይ OCR + Metadata Scan + Date Check + 100,000 ትኬት ምምዝጋብ -->
+  <!-- 2. ናይ Universal All-Bank OCR + 100,000 ትኬት ምምዝጋብ -->
   <script>
     let OFFICIAL_TICKET_PRICE = parseFloat(localStorage.getItem("permanent_ticket_price")) || 1000;
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
@@ -496,11 +492,37 @@
       }
     }
 
-    // ⚡ 2 ሰከንድ ናይ ስእሊ መርመራ
+    function parseAnyBankReceipt(text) {
+      let txId = null;
+
+      const ftMatch = text.match(/\bFT[0-9A-Z]{6,}\b/i);
+      if (ftMatch) {
+        txId = ftMatch[0].toUpperCase();
+      } else {
+        const labelRegex = /(?:Ref(?:\.|\s*No|\s*ID)?|Txn(?:\s*ID|\s*No)?|Transaction(?:\s*ID|\s*No)?|Receipt(?:\s*No)?|Journal(?:\s*No)?|Trace(?:\s*No)?|Doc(?:\s*No)?|Reference|Code)\s*[:\-\#]?\s*([A-Za-z0-9\-_]{6,26})/i;
+        const match = text.match(labelRegex);
+        if (match && match[1]) {
+          txId = match[1].toUpperCase();
+        }
+      }
+
+      if (!txId) {
+        const longNumMatch = text.match(/\b[0-9]{10,18}\b/);
+        if (longNumMatch && !longNumMatch[0].includes("1000791356397")) {
+          txId = longNumMatch[0];
+        }
+      }
+
+      const isBisratAccount = /1000791356397/.test(text) || /791356397/.test(text);
+      const isBisratName = /Bisrat/i.test(text) || /Atsibeha/i.test(text);
+      const isCorrectReceiver = isBisratAccount || isBisratName;
+
+      return { txId, isCorrectReceiver };
+    }
+
     async function handleReceiptScan(e) {
       e.preventDefault();
 
-      // ዕጻ ተዓጽዩ እንተሃልዩ ዓግቶ
       const isActive = localStorage.getItem("lottery_is_active") !== "false";
       if (!isActive) {
         alert("🛑 ይቕሬታ! ናይዚ ዙርያ ናይ ዕጻ መሸጣ ተዓጽዩ ኣሎ። ቀጻሊ ዙርያ ተኸታተሉ።");
@@ -512,14 +534,13 @@
       const fileInput = document.getElementById("receiptImage");
 
       if (!fileInput.files || fileInput.files.length === 0) {
-        alert("በጃኹም ናይ CBE ደረሰኝ ስክሪንሾት ምረጹ!");
+        alert("በጃኹም ናይ ባንኪ ደረሰኝ ስክሪንሾት ምረጹ!");
         return;
       }
 
       const file = fileInput.files[0];
       btn.disabled = true;
 
-      // 🛡️ መርመራ 1፦ EXIF Metadata Scan
       statusText.innerText = "🔍 1/4: ናይ ስእሊ ጽሬትን ኤዲቲንግን ይምርመር ኣሎ...";
       statusText.className = "text-[11px] text-yellow-400 mt-1 font-semibold";
 
@@ -532,8 +553,7 @@
         return;
       }
 
-      // 🔍 መርመራ 2፦ Digital OCR Scan
-      statusText.innerText = "⚡ 2/4: ናይ ባንኪ ደረሰኝ ቁጽርን ዕለትን ብ-AI ይንበብ ኣሎ...";
+      statusText.innerText = "⚡ 2/4: ናይ ባንኪ ደረሰኝ ቁጽርን ተቐባልን ብ-AI ይንበብ ኣሎ...";
       
       let extractedText = "";
       try {
@@ -545,23 +565,28 @@
         console.log("OCR Error:", ocrErr);
       }
 
-      const ftMatch = extractedText.match(/FT[0-9A-Z]{6,}/i);
+      const { txId, isCorrectReceiver } = parseAnyBankReceipt(extractedText);
       
-      if (!ftMatch) {
-        alert("❌ ይቕሬታ! ኣብዚ ስእሊ ናይ ንግዲ ባንክ ደረሰኝ ቁጽሪ (FT...) ኣይተረኽበን። በጃኹም ጽሩይ ናይ CBE ስክሪንሾት ስቐሉ።");
+      if (!txId) {
+        alert("❌ ይቕሬታ! ኣብዚ ስእሊ ናይ ባንኪ ደረሰኝ ቁጽሪ (Transaction / Reference ID) ኣይተረኽበን። በጃኹም ጽሩይ ናይ ባንኪ ስክሪንሾት ስቐሉ።");
         btn.disabled = false;
         statusText.innerText = "* ጽሩይ ናይ ባንኪ ስክሪንሾት ስቐሉ።";
         statusText.className = "text-[11px] text-red-400 mt-1";
         return;
       }
 
-      const txId = ftMatch[0].toUpperCase();
+      if (!isCorrectReceiver) {
+        alert("❌ ጌጋ! እዚ ደረሰኝ ናብ Bisrat Atsibeha (1000791356397) ዝተኸፈለ ኣይኮነን! ናብ ትኽክለኛ ኣካውንት ዝተኸፈለ ደረሰኝ ስቐሉ።");
+        btn.disabled = false;
+        statusText.innerText = "* ናይ ጌጋ ተቐባሊ ደረሰኝ ተነጺጉ።";
+        statusText.className = "text-[11px] text-red-400 mt-1";
+        return;
+      }
 
-      // 📅 መርመራ 3፦ ናይ ዕለትን ናይ ሕሉፍ ዓመትን ምጽራይ
       statusText.innerText = "📅 3/4: ናይ ደረሰኝ ዕለት ይምርመር ኣሎ...";
       
       const currentYear = new Date().getFullYear().toString(); // 2026
-      if (!txId.startsWith("FT" + currentYear.slice(-2)) && !extractedText.includes(currentYear)) {
+      if (!txId.startsWith("FT" + currentYear.slice(-2)) && !extractedText.includes(currentYear) && !extractedText.includes(currentYear.slice(-2))) {
         alert("❌ ይቕሬታ! እዚ ደረሰኝ ናይ ሕሉፍ ዓመት (ናይ ቀደም) እዩ! ንናይ ሎሚ ዕጻ ናይ ሎሚ ዝተኸፈለ ደረሰኝ ጥራይ እዩ ዝፍቀድ።");
         btn.disabled = false;
         statusText.innerText = "* ናይ ሕሉፍ ዓመት ደረሰኝ ተነጺጉ።";
@@ -577,7 +602,6 @@
       const developerFee = 100;
       const organizerShare = ticketPrice - developerFee;
 
-      // 🔐 መርመራ 4፦ 100,000 ተኸታታሊ ትኬት ምሃብ
       const { data, error } = await supabaseClient.rpc('register_ticket_atomic', {
         p_full_name: fullName,
         p_phone_number: phone,
@@ -599,7 +623,6 @@
         return;
       }
 
-      // 🎉 ዓወት! ትኬት ምግሃድ
       const ticketCode = data.ticket_number;
       const slotNumber = data.slot_number;
 
@@ -619,7 +642,6 @@
       });
     }
 
-    // 🛡️ EXIF መርማሪ
     function checkExifTamper(file) {
       return new Promise((resolve) => {
         EXIF.getData(file, function() {
@@ -636,7 +658,6 @@
       });
     }
 
-    // 🖨️ ናይ ቢንጎ ጣውላ ሰነድ መውጽኢ
     async function printBingoRoster() {
       if (!supabaseClient) return;
 
@@ -673,7 +694,7 @@
                 <th>ምሉእ ሽም (ስም ኣቦ-ሓጎ)</th>
                 <th>ስልኪ ቁጽሪ</th>
                 <th>ዋጋ</th>
-                <th>ናይ CBE ደረሰኝ (TxID)</th>
+                <th>ናይ ባንኪ ደረሰኝ (TxID)</th>
               </tr>
             </thead>
             <tbody>
