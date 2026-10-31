@@ -236,8 +236,12 @@
 
         <hr class="border-gray-700">
 
-        <!-- 🚀 ናይ ዕጻ ዙርያ መቆጻጸሪ (ON / OFF SWITCH) -->
+        <!-- 🚀 ናይ ዕጻ ዙርያ መቆጻጸሪ (ON / OFF SWITCH + ROUND) -->
         <div class="bg-gray-900/90 border border-yellow-500/40 rounded-xl p-3 text-xs space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 font-semibold">ናይ ሕዚ ዙርያ፦</span>
+            <span id="currentRoundDisplay" class="font-bold text-yellow-400 font-mono">ዙርያ 1</span>
+          </div>
           <div class="flex justify-between items-center">
             <span class="text-gray-400 font-semibold">ኩነታት ዕጻ፦</span>
             <span id="roundStatusBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/40">
@@ -251,13 +255,13 @@
           
           <div class="grid grid-cols-2 gap-2 pt-1">
             <button type="button" onclick="startNewLotteryRound()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-[11px] transition shadow flex items-center justify-center space-x-1">
-              <span>🚀 ሓዲሽ ዙርያ ጀምር (ON)</span>
+              <span>🚀 ሓዲሽ ዙርያ ጀምር (Reset to #1)</span>
             </button>
             <button type="button" onclick="stopLotteryRound()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-[11px] transition shadow flex items-center justify-center space-x-1">
               <span>🛑 ዕጻ ደው ኣብል (OFF)</span>
             </button>
           </div>
-          <p class="text-[10px] text-gray-500">* "ደው ኣብል" ምስ ጠወቕካዮ፡ ዓደግቲ ተወሳኺ ትኬት ከይገዝኡ እቲ ዌብሳይት ይዕጾ!</p>
+          <p class="text-[10px] text-gray-500">* "ሓዲሽ ዙርያ ጀምር" ምስ ጠወቕካዮ፡ ቀጻሊ ዙርያ ካብ ሳንዱቕ #1 ጀሚሩ ብጽሩይ ይዳሎ!</p>
         </div>
 
         <hr class="border-gray-700">
@@ -345,17 +349,23 @@
       alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ኣብ ክላውድ ቀዋሚ ኮይኑ ተዓቒቡ ኣሎ!");
     }
 
+    // 🚀 ሓዲሽ ዙርያ ምጅማር (Next Round + Reset Sequence to Slot #1)
     async function startNewLotteryRound() {
       const now = new Date();
       const timestamp = now.getTime();
       const formattedTime = now.toLocaleDateString() + " " + now.toLocaleTimeString();
 
+      let currentRound = parseInt(localStorage.getItem("lottery_current_round") || "1");
+      let nextRound = currentRound + 1;
+
+      localStorage.setItem("lottery_current_round", nextRound.toString());
       localStorage.setItem("lottery_start_time", timestamp.toString());
       localStorage.setItem("lottery_start_time_text", formattedTime);
       localStorage.setItem("lottery_is_active", "true");
 
       if (supabaseClient) {
         try {
+          await supabaseClient.from('settings').upsert({ id: 'current_round', price: nextRound });
           await supabaseClient.from('settings').upsert({ id: 'round_start_time', price: timestamp });
           await supabaseClient.from('settings').upsert({ id: 'is_active', price: 1 });
         } catch(e) {
@@ -365,9 +375,10 @@
 
       updateRoundDisplay();
       applyLotteryStatusUI(true);
-      alert("🚀 ሓዲሽ ናይ ዕጻ ዙርያ ብወግዒ ተኸፊቱ (ON) ኣሎ!\nመበገሲ ሰዓት፦ " + formattedTime);
+      alert("🚀 ሓዲሽ ናይ ዕጻ ዙርያ (" + nextRound + ") ብወግዒ ተኸፊቱ ኣሎ!\nትኬታት ካብ ሳንዱቕ #1 (BISRAT-000001) ጀሚሮም ይወሃቡ!\nመበገሲ ሰዓት፦ " + formattedTime);
     }
 
+    // 🛑 ዕጻ ደው ምባል
     async function stopLotteryRound() {
       localStorage.setItem("lottery_is_active", "false");
 
@@ -385,6 +396,9 @@
     }
 
     function updateRoundDisplay() {
+      const roundNum = localStorage.getItem("lottery_current_round") || "1";
+      document.getElementById("currentRoundDisplay").innerText = "ዙርያ " + roundNum;
+
       const savedText = localStorage.getItem("lottery_start_time_text") || "ድሉው";
       document.getElementById("roundStartTimeDisplay").innerText = savedText;
       
@@ -452,7 +466,7 @@
     let OFFICIAL_TICKET_PRICE = parseFloat(localStorage.getItem("permanent_ticket_price")) || 1000;
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
     
-    // 🔑 እታ ብምልእታ ዝተረጋገጸት ናትካ ናይ Supabase Anon Key
+    
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlxa2NvZGtsYWppZGRxeHlvaHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3MTQ5NDEsImV4cCI6MjEwNzI5MDk0MX0.HniZp51LScocdXDfR9Dt6rYOKdsVRZ7JUb2kcU7AH7E";
 
     let supabaseClient = null;
@@ -481,6 +495,9 @@
             if (item.id === 'round_start_time' && item.price) {
               localStorage.setItem("lottery_start_time", item.price.toString());
             }
+            if (item.id === 'current_round' && item.price) {
+              localStorage.setItem("lottery_current_round", item.price.toString());
+            }
             if (item.id === 'is_active') {
               const isOpen = item.price === 1;
               localStorage.setItem("lottery_is_active", isOpen ? "true" : "false");
@@ -493,7 +510,6 @@
       }
     }
 
-    // 🔒 ናይ ስእሊ ፍሉይ ዲጂታል ኣሰር (SHA-256 Hash) መፍጠሪ Function
     async function computeFileHash(file) {
       const buffer = await file.arrayBuffer();
       const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
@@ -504,12 +520,10 @@
     function parseAnyBankReceipt(text) {
       let txId = null;
 
-      // 1. ንግዲ ባንክ (CBE FT...)
       const ftMatch = text.match(/\bFT[0-9A-Z]{6,}\b/i);
       if (ftMatch) {
         txId = ftMatch[0].toUpperCase();
       } else {
-        // 2. ካልኦት ባንክታት
         const labelRegex = /(?:Ref(?:\.|\s*No|\s*ID)?|Txn(?:\s*ID|\s*No)?|Transaction(?:\s*ID|\s*No)?|Receipt(?:\s*No)?|Journal(?:\s*No)?|Trace(?:\s*No)?|Doc(?:\s*No)?|Reference|Code)\s*[:\-\#]?\s*([A-Za-z0-9\-_]{6,26})/i;
         const match = text.match(labelRegex);
         if (match && match[1]) {
@@ -524,7 +538,6 @@
         }
       }
 
-      // 3. ተቐባሊ Bisrat Gebresilassie Weldu ወይ 1000776244604 ምዃኑ ምጽራይ
       const isBisratAccount = /1000776244604/.test(text) || /776244604/.test(text);
       const isBisratName = /Bisrat/i.test(text) || /Gebresilassie/i.test(text) || /Weldu/i.test(text);
       const isCorrectReceiver = isBisratAccount || isBisratName;
@@ -532,7 +545,6 @@
       return { txId, isCorrectReceiver };
     }
 
-    // ⚡ ናይ ስእሊ መርመራ
     async function handleReceiptScan(e) {
       e.preventDefault();
 
@@ -554,7 +566,6 @@
       const file = fileInput.files[0];
       btn.disabled = true;
 
-      // 🔒 1. ናይቲ ስእሊ ፍሉይ ዲጂታል ኣሰር (SHA-256) ምውጻእ
       statusText.innerText = "🔒 1/4: ናይ ስእሊ ፍሉይ ዲጂታል ኣሰር ይምርመር ኣሎ...";
       statusText.className = "text-[11px] text-yellow-400 mt-1 font-semibold";
       
@@ -565,7 +576,6 @@
         console.log("Hash calculation error:", hashErr);
       }
 
-      // 🛡️ 2. EXIF Metadata Scan
       const isPhotoshop = await checkExifTamper(file);
       if (isPhotoshop) {
         alert("❌ ጌጋ! እዚ ስእሊ ብ-Photoshop ወይ ብናይ ኤዲቲንግ ኣፕሊኬሽን ዝተተንከፈ እዩ! ንጹር ናይ ባንኪ ስክሪንሾት ስቐሉ።");
@@ -575,7 +585,6 @@
         return;
       }
 
-      // 🔍 3. Digital OCR Scan
       statusText.innerText = "⚡ 2/4: ናይ ባንኪ ደረሰኝ ቁጽርን ተቐባልን ብ-AI ይንበብ ኣሎ...";
       
       let extractedText = "";
@@ -606,7 +615,6 @@
         return;
       }
 
-      // 📅 4. ናይ ዕለት ምጽራይ
       statusText.innerText = "📅 3/4: ናይ ደረሰኝ ዕለት ይምርመር ኣሎ...";
       
       const currentYear = new Date().getFullYear().toString(); // 2026
@@ -626,7 +634,6 @@
       const developerFee = 100;
       const organizerShare = ticketPrice - developerFee;
 
-      // 🔐 5. 100,000 ተኸታታሊ ትኬት ምሃብ (ምስ Image Hash ምጽራይ!)
       const { data, error } = await supabaseClient.rpc('register_ticket_atomic', {
         p_full_name: fullName,
         p_phone_number: phone,
@@ -684,16 +691,21 @@
       });
     }
 
+    // 🖨️ ናይ ቢንጎ ጣውላ ሰነድ መውጽኢ (ናይ ሕዚ ዙርያ ጥራይ!)
     async function printBingoRoster() {
       if (!supabaseClient) return;
 
+      const currentRound = parseInt(localStorage.getItem("lottery_current_round") || "1");
+
+      // ናይዚ ናይ ሕዚ ዙርያ ጥራይ ኣምጽእ!
       const { data: tickets, error } = await supabaseClient
         .from('tickets')
         .select('*')
-        .order('id', { ascending: true });
+        .eq('round_number', currentRound)
+        .order('slot_number', { ascending: true });
 
       if (error || !tickets || tickets.length === 0) {
-        alert("ዝተመዝገበ ትኬት ኣይተረኽበን።");
+        alert("ኣብዚ ዙርያ (" + currentRound + ") ዝተመዝገበ ትኬት ገና ኣይተረኽበን።");
         return;
       }
 
@@ -710,7 +722,7 @@
           </style>
         </head>
         <body>
-          <h2>ብስራት ኦንላይን ዕጻ - ወግዓዊ ናይ TikTok Live ናይ ቢንጎ ጣውላ መዝገብ</h2>
+          <h2>ብስራት ኦንላይን ዕጻ - ወግዓዊ ናይ TikTok Live ናይ ቢንጎ ጣውላ መዝገብ (ዙርያ ${currentRound})</h2>
           <p><strong>ጠቕላላ ተሳተፍቲ:</strong> ${tickets.length} | <strong>ዕለት:</strong> ${new Date().toLocaleDateString()}</p>
           <table>
             <thead>
@@ -726,10 +738,10 @@
             <tbody>
       `;
 
-      tickets.forEach((t, index) => {
+      tickets.forEach((t) => {
         printContent += `
           <tr>
-            <td><strong>#${index + 1}</strong></td>
+            <td><strong>#${t.slot_number}</strong></td>
             <td><strong>${t.ticket_number}</strong></td>
             <td>${t.full_name}</td>
             <td>${t.phone_number}</td>
