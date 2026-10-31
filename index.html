@@ -447,12 +447,12 @@
     }
   </script>
 
-  <!-- 2. ናይ Universal All-Bank OCR + 100,000 ትኬት ምምዝጋብ -->
+  <!-- 2. ናይ Universal All-Bank OCR + SHA-256 Fingerprint + 100,000 ትኬት ምምዝጋብ -->
   <script>
     let OFFICIAL_TICKET_PRICE = parseFloat(localStorage.getItem("permanent_ticket_price")) || 1000;
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
     
-    
+    // 🔑 እታ ብምልእታ ዝተረጋገጸት ናትካ ናይ Supabase Anon Key
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlxa2NvZGtsYWppZGRxeHlvaHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3MTQ5NDEsImV4cCI6MjEwNzI5MDk0MX0.HniZp51LScocdXDfR9Dt6rYOKdsVRZ7JUb2kcU7AH7E";
 
     let supabaseClient = null;
@@ -493,7 +493,14 @@
       }
     }
 
-    // ⚡ ናይ ዝኾነ ባንኪ ደረሰኝ መላሊ ፍሉይ ሞተር (ዘተመዓራረየ ናይ Bisrat CBE ኣካውንት)
+    // 🔒 ናይ ስእሊ ፍሉይ ዲጂታል ኣሰር (SHA-256 Hash) መፍጠሪ Function
+    async function computeFileHash(file) {
+      const buffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     function parseAnyBankReceipt(text) {
       let txId = null;
 
@@ -502,7 +509,7 @@
       if (ftMatch) {
         txId = ftMatch[0].toUpperCase();
       } else {
-        // 2. ካልኦት ባንክታት (Telebirr, Awash, Abyssinia, Dashen ወዘተ)
+        // 2. ካልኦት ባንክታት
         const labelRegex = /(?:Ref(?:\.|\s*No|\s*ID)?|Txn(?:\s*ID|\s*No)?|Transaction(?:\s*ID|\s*No)?|Receipt(?:\s*No)?|Journal(?:\s*No)?|Trace(?:\s*No)?|Doc(?:\s*No)?|Reference|Code)\s*[:\-\#]?\s*([A-Za-z0-9\-_]{6,26})/i;
         const match = text.match(labelRegex);
         if (match && match[1]) {
@@ -510,7 +517,6 @@
         }
       }
 
-      // 3. ተወሳኺ ፍተሻ (10-18 ድጂት ዘለዎ ናይ ባንኪ ቁጽሪ)
       if (!txId) {
         const longNumMatch = text.match(/\b[0-9]{10,18}\b/);
         if (longNumMatch && !longNumMatch[0].includes("1000776244604")) {
@@ -518,7 +524,7 @@
         }
       }
 
-      // 4. ተቐባሊ Bisrat Gebresilassie Weldu ወይ 1000776244604 ምዃኑ ምጽራይ
+      // 3. ተቐባሊ Bisrat Gebresilassie Weldu ወይ 1000776244604 ምዃኑ ምጽራይ
       const isBisratAccount = /1000776244604/.test(text) || /776244604/.test(text);
       const isBisratName = /Bisrat/i.test(text) || /Gebresilassie/i.test(text) || /Weldu/i.test(text);
       const isCorrectReceiver = isBisratAccount || isBisratName;
@@ -526,6 +532,7 @@
       return { txId, isCorrectReceiver };
     }
 
+    // ⚡ ናይ ስእሊ መርመራ
     async function handleReceiptScan(e) {
       e.preventDefault();
 
@@ -547,9 +554,18 @@
       const file = fileInput.files[0];
       btn.disabled = true;
 
-      statusText.innerText = "🔍 1/4: ናይ ስእሊ ጽሬትን ኤዲቲንግን ይምርመር ኣሎ...";
+      // 🔒 1. ናይቲ ስእሊ ፍሉይ ዲጂታል ኣሰር (SHA-256) ምውጻእ
+      statusText.innerText = "🔒 1/4: ናይ ስእሊ ፍሉይ ዲጂታል ኣሰር ይምርመር ኣሎ...";
       statusText.className = "text-[11px] text-yellow-400 mt-1 font-semibold";
+      
+      let imageHash = "";
+      try {
+        imageHash = await computeFileHash(file);
+      } catch(hashErr) {
+        console.log("Hash calculation error:", hashErr);
+      }
 
+      // 🛡️ 2. EXIF Metadata Scan
       const isPhotoshop = await checkExifTamper(file);
       if (isPhotoshop) {
         alert("❌ ጌጋ! እዚ ስእሊ ብ-Photoshop ወይ ብናይ ኤዲቲንግ ኣፕሊኬሽን ዝተተንከፈ እዩ! ንጹር ናይ ባንኪ ስክሪንሾት ስቐሉ።");
@@ -559,6 +575,7 @@
         return;
       }
 
+      // 🔍 3. Digital OCR Scan
       statusText.innerText = "⚡ 2/4: ናይ ባንኪ ደረሰኝ ቁጽርን ተቐባልን ብ-AI ይንበብ ኣሎ...";
       
       let extractedText = "";
@@ -589,6 +606,7 @@
         return;
       }
 
+      // 📅 4. ናይ ዕለት ምጽራይ
       statusText.innerText = "📅 3/4: ናይ ደረሰኝ ዕለት ይምርመር ኣሎ...";
       
       const currentYear = new Date().getFullYear().toString(); // 2026
@@ -608,18 +626,20 @@
       const developerFee = 100;
       const organizerShare = ticketPrice - developerFee;
 
+      // 🔐 5. 100,000 ተኸታታሊ ትኬት ምሃብ (ምስ Image Hash ምጽራይ!)
       const { data, error } = await supabaseClient.rpc('register_ticket_atomic', {
         p_full_name: fullName,
         p_phone_number: phone,
         p_transaction_id: txId,
         p_ticket_price: ticketPrice,
         p_developer_fee: developerFee,
-        p_organizer_share: organizerShare
+        p_organizer_share: organizerShare,
+        p_image_hash: imageHash
       });
 
       if (error || !data.success) {
         if (data && data.error === 'ALREADY_USED') {
-          alert("❌ ጌጋ! እዚ ናይ ባንኪ ደረሰኝ ቁጽሪ (" + txId + ") ቅድሚ ሕዚ ትኬት ተወሲዱሉ እዩ! ሓደ ደረሰኝ ንክልተ ሰብ ኣይሰርሕን።");
+          alert("❌ ጌጋ! እዚ ደረሰኝ ቅድሚ ሕዚ ትኬት ተወሲዱሉ እዩ! ሓንቲ ስክሪንሾት ደጊምካ ምጥቃም ብሕጊ ክልኩል እዩ።");
         } else {
           alert("ጌጋ ተፈጢሩ: " + (error ? error.message : data.error));
         }
