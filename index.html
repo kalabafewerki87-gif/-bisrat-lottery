@@ -118,7 +118,7 @@
         <!-- 📸 ናይ ባንኪ ደረሰኝ ስክሪንሾት መእተዊ -->
         <div>
           <label class="block text-xs text-yellow-400 font-semibold mb-1">
-            📸 ናይ ባንኪ ደረሰኝ ስክሪንሾት ስቐሉ (ካብ ዝኾነ ባንኪ ዝተኸፈለ) *
+            📸 ናይ ባንኪ ደረሰኝ ስክሪንሾት ስቐሉ (ናይ ሎሚ ዝተኸፈለ ጥራይ) *
           </label>
           <input type="file" id="receiptImage" accept="image/*" required onchange="handleFileSelect(event)"
             class="w-full bg-gray-900 border border-yellow-500/60 rounded-lg p-2 text-xs text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-yellow-500 file:text-black hover:file:bg-yellow-600 cursor-pointer">
@@ -134,7 +134,7 @@
           </div>
 
           <p id="scanStatus" class="text-[11px] text-gray-400 mt-1">
-            * ካብ CBE፣ Telebirr፣ ኣዋሽ፣ ዳሽን፣ ወጋገን ወይ ካልእ ዝኾነ ባንኪ ናብዚ ናይ CBE ሕሳብና ዝተኸፈለ ስክሪንሾት ስቐሉ። እቲ ሲስተም ብቕጽበት መርሚሩ ትኬትኩም ክህበኩም እዩ።
+            * ናይ ሎሚ ዝተኸፈለ ናይ ባንኪ ስክሪንሾት ስቐሉ። ናይ ትማሊ ወይ ናይ ሕሉፍ ዕለት ደረሰኝ ብኣውቶማቲክ ይንጸግ እዩ።
           </p>
         </div>
 
@@ -349,7 +349,6 @@
       alert("✅ ዋጋ ትኬት ብትኽክል ናብ " + newPrice.toLocaleString() + " ብር ተቐይሩ ኣብ ክላውድ ቀዋሚ ኮይኑ ተዓቒቡ ኣሎ!");
     }
 
-    // 🚀 ሓዲሽ ዙርያ ምጅማር (Next Round + Reset Sequence to Slot #1)
     async function startNewLotteryRound() {
       const now = new Date();
       const timestamp = now.getTime();
@@ -378,7 +377,6 @@
       alert("🚀 ሓዲሽ ናይ ዕጻ ዙርያ (" + nextRound + ") ብወግዒ ተኸፊቱ ኣሎ!\nትኬታት ካብ ሳንዱቕ #1 (BISRAT-000001) ጀሚሮም ይወሃቡ!\nመበገሲ ሰዓት፦ " + formattedTime);
     }
 
-    // 🛑 ዕጻ ደው ምባል
     async function stopLotteryRound() {
       localStorage.setItem("lottery_is_active", "false");
 
@@ -461,7 +459,7 @@
     }
   </script>
 
-  <!-- 2. ናይ Universal All-Bank OCR + SHA-256 Fingerprint + 100,000 ትኬት ምምዝጋብ -->
+  <!-- 2. ናይ Universal All-Bank OCR + SHA-256 Fingerprint + Strict Same-Day Lock -->
   <script>
     let OFFICIAL_TICKET_PRICE = parseFloat(localStorage.getItem("permanent_ticket_price")) || 1000;
     const SUPABASE_URL = "https://yqkcodklajiddqxyohqw.supabase.co";
@@ -545,6 +543,55 @@
       return { txId, isCorrectReceiver };
     }
 
+    // 📅 ጥብቂ ናይ ሎሚ መዓልቲ መርመራ (Strict Same-Day Validation)
+    function validateSameDayReceipt(extractedText, txId) {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+
+      // 1. CBE FT Julian Day Check (ናይ ንግዲ ባንክ ሓቀኛ መዓልቲ መርመራ)
+      if (txId && txId.startsWith("FT" + currentYear.toString().slice(-2))) {
+        const startOfYear = new Date(currentYear, 0, 0);
+        const diff = now - startOfYear;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const todayJulian = Math.floor(diff / oneDay); // ናይ ሎሚ መዓልቲ ዓመት
+
+        const receiptJulian = parseInt(txId.substring(4, 7), 10);
+        if (!isNaN(receiptJulian)) {
+          // እቲ ደረሰኝ ካብ ናይ ሎሚ ዝነኣሰ መዓልቲ እንተኾይኑ (ናይ ትማሊ ወይ ናይ ቀደም) ➔ ስረዞ!
+          if (receiptJulian < todayJulian) {
+            return { valid: false, reason: "እዚ ደረሰኝ ናይ ትማሊ ወይ ናይ ሕሉፍ መዓልቲ ዝተኸፈለ እዩ!" };
+          }
+        }
+      }
+
+      // 2. OCR Text Date Parsing (ናይ ኩሎም ባንክታት ዕለት ምጽራይ)
+      const dateMatches = extractedText.match(/\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](202\d|\d{2})\b/g) || [];
+      for (let dateStr of dateMatches) {
+        const parts = dateStr.split(/[\/\-\.]/).map(p => parseInt(p, 10));
+        let d, m, y;
+        if (parts[0] > 1000) {
+          y = parts[0]; m = parts[1]; d = parts[2];
+        } else {
+          d = parts[0]; m = parts[1]; y = parts[2] < 100 ? 2000 + parts[2] : parts[2];
+        }
+
+        if (y !== currentYear) {
+          return { valid: false, reason: "እዚ ደረሰኝ ናይ ሕሉፍ ዓመት እዩ!" };
+        }
+
+        const receiptDate = new Date(y, m - 1, d);
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // ትማሊ ወይ ቅድሚኡ እንተኾይኑ ➔ ስረዞ!
+        if (receiptDate < todayMidnight) {
+          return { valid: false, reason: "እዚ ደረሰኝ ናይ ትማሊ ወይ ናይ ሕሉፍ ዕለት (" + d + "/" + m + "/" + y + ") እዩ!" };
+        }
+      }
+
+      return { valid: true };
+    }
+
+    // ⚡ ናይ ስእሊ መርመራ
     async function handleReceiptScan(e) {
       e.preventDefault();
 
@@ -566,6 +613,7 @@
       const file = fileInput.files[0];
       btn.disabled = true;
 
+      // 🔒 1. ናይቲ ስእሊ ፍሉይ ዲጂታል ኣሰር (SHA-256) ምውጻእ
       statusText.innerText = "🔒 1/4: ናይ ስእሊ ፍሉይ ዲጂታል ኣሰር ይምርመር ኣሎ...";
       statusText.className = "text-[11px] text-yellow-400 mt-1 font-semibold";
       
@@ -576,6 +624,7 @@
         console.log("Hash calculation error:", hashErr);
       }
 
+      // 🛡️ 2. EXIF Metadata Scan
       const isPhotoshop = await checkExifTamper(file);
       if (isPhotoshop) {
         alert("❌ ጌጋ! እዚ ስእሊ ብ-Photoshop ወይ ብናይ ኤዲቲንግ ኣፕሊኬሽን ዝተተንከፈ እዩ! ንጹር ናይ ባንኪ ስክሪንሾት ስቐሉ።");
@@ -585,6 +634,7 @@
         return;
       }
 
+      // 🔍 3. Digital OCR Scan
       statusText.innerText = "⚡ 2/4: ናይ ባንኪ ደረሰኝ ቁጽርን ተቐባልን ብ-AI ይንበብ ኣሎ...";
       
       let extractedText = "";
@@ -615,13 +665,14 @@
         return;
       }
 
-      statusText.innerText = "📅 3/4: ናይ ደረሰኝ ዕለት ይምርመር ኣሎ...";
+      // 📅 4. ናይ ሎሚ መዓልቲ ጥብቂ መርመራ (Strict Day Check!)
+      statusText.innerText = "📅 3/4: ናይ ሎሚ መዓልቲ ምዃኑ ይረጋገጽ ኣሎ...";
       
-      const currentYear = new Date().getFullYear().toString(); // 2026
-      if (!txId.startsWith("FT" + currentYear.slice(-2)) && !extractedText.includes(currentYear) && !extractedText.includes(currentYear.slice(-2))) {
-        alert("❌ ይቕሬታ! እዚ ደረሰኝ ናይ ሕሉፍ ዓመት (ናይ ቀደም) እዩ! ንናይ ሎሚ ዕጻ ናይ ሎሚ ዝተኸፈለ ደረሰኝ ጥራይ እዩ ዝፍቀድ።");
+      const dateCheck = validateSameDayReceipt(extractedText, txId);
+      if (!dateCheck.valid) {
+        alert("❌ ይቕሬታ! " + dateCheck.reason + "\nንናይ ሎሚ ዕጻ ናይ ሎሚ ዝተኸፈለ ደረሰኝ ጥራይ እዩ ዝፍቀድ!");
         btn.disabled = false;
-        statusText.innerText = "* ናይ ሕሉፍ ዓመት ደረሰኝ ተነጺጉ።";
+        statusText.innerText = "* " + dateCheck.reason;
         statusText.className = "text-[11px] text-red-400 mt-1";
         return;
       }
@@ -634,6 +685,7 @@
       const developerFee = 100;
       const organizerShare = ticketPrice - developerFee;
 
+      // 🔐 5. 100,000 ተኸታታሊ ትኬት ምሃብ
       const { data, error } = await supabaseClient.rpc('register_ticket_atomic', {
         p_full_name: fullName,
         p_phone_number: phone,
@@ -691,13 +743,12 @@
       });
     }
 
-    // 🖨️ ናይ ቢንጎ ጣውላ ሰነድ መውጽኢ (ናይ ሕዚ ዙርያ ጥራይ!)
+    // 🖨️ ናይ ቢንጎ ጣውላ ሰነድ መውጽኢ
     async function printBingoRoster() {
       if (!supabaseClient) return;
 
       const currentRound = parseInt(localStorage.getItem("lottery_current_round") || "1");
 
-      // ናይዚ ናይ ሕዚ ዙርያ ጥራይ ኣምጽእ!
       const { data: tickets, error } = await supabaseClient
         .from('tickets')
         .select('*')
